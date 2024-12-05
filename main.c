@@ -46,12 +46,17 @@ void draw_line_view(t_mlx_ptrs *mlx_ptrs,t_player_info *player_infos, int line_l
 {
     float x1;
     float y1;
+    int x;
+    int y;
    
     while(line_lenght >= 2)
     {
         x1 = player_infos->i + cos(player_infos->rotation_angle) * line_lenght;
         y1 = player_infos->j + sin(player_infos->rotation_angle) * line_lenght;
-        mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x1, y1, color);
+        y = (int)y1 / cub_size;
+        x = (int)x1 / cub_size;
+        if (map[y][x] != '1')
+            mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x1, y1, color);
         line_lenght--;
     }
 }
@@ -106,76 +111,119 @@ void which_element(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos)
     }
 }
 
-void check_player_new_pos(t_player_info *player_infos)
+
+void player_new_pos(t_player_info *player_infos)
 {
     int x;
     int y;
-    int move_speed;
+    float move_speed;
+    float x1;
+    float y1;
 
     y = player_infos->new_j / cub_size;
     x = player_infos->new_i / cub_size;
-    if (map[y][x] != '1')
+    move_speed = player_infos->move_speed;
+    if (map[y][x] == '1')
     {
-        // if (player_infos->new_i != player_infos->i)
-        // {
-        //     move_speed = player_infos->i - (32 * (player_infos->i / 32)) + 1;
-        //     player_infos->i = player_infos->i + cos(player_infos->rotation_angle) * move_speed; 
-        // }
-        // else
-            player_infos->i = player_infos->new_i;
-        // if (player_infos->new_i != player_infos->i)
-        // {
-        //     move_speed = player_infos->j - (32 * (player_infos->j / 32)) + 1;
-        //     player_infos->j = player_infos->j + sin(player_infos->rotation_angle) * move_speed; 
-        // }
-        // else
-            player_infos->j = player_infos->new_j;
+        while(move_speed > 0)
+        {
+            x1 = player_infos->i + cos(player_infos->rotation_angle ) * (move_speed * -1);
+            y1 = player_infos->j + sin(player_infos->rotation_angle ) * (move_speed * -1);
+            y = y1 / cub_size;
+            x = x1 / cub_size;
+            if(map[y][x] != '1')
+            {
+               
+                player_infos->i = x1;
+                player_infos->j = y1;
+                return ; 
+            }
+            move_speed -= 0.1;
+        }
     }
-    //else
-    // {
-    //     player_infos->j = player_infos->new_j;
-    //     player_infos->i = player_infos->new_i;
-    // }
+    else
+    {
+        player_infos->j = player_infos->new_j;
+        player_infos->i = player_infos->new_i;
+    }
 }
+
+void player_new_pos_up(t_player_info *player_infos)
+{
+    int x;
+    int y;
+    float move_speed;
+    float x1;
+    float y1;
+
+    y = player_infos->new_j / cub_size;
+    x = player_infos->new_i / cub_size;
+    move_speed = player_infos->move_speed;
+    if (map[y][x] == '1')
+    {
+        while (move_speed > 0)
+        {
+            x1 = player_infos->i + cos(player_infos->rotation_angle) * (move_speed);
+            y1 = player_infos->j + sin(player_infos->rotation_angle ) * (move_speed);
+            y = (int)y1 / cub_size;
+            x = (int)x1 / cub_size;
+            if (map[y][x] != '1')
+            {
+                player_infos->i = x1;
+                player_infos->j = y1;
+                return;
+            }
+            move_speed -= 0.1; 
+        }
+    }
+    else
+    {
+        player_infos->j = player_infos->new_j;
+        player_infos->i = player_infos->new_i;
+    }
+}
+
+
+
 int handlle_keys(int keynum, t_player_info *player_infos)
 {
-    if (keynum == 124)
+    if (keynum == 65363)
     {
-        which_element(player_infos->mlx_ptrs, player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
         player_infos->rotation_angle += player_infos->rotation_speed * 1;   
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
-        draw_circle(player_infos->mlx_ptrs, player_infos, 2, 0xfff000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
         
     }
-    if(keynum == 123)
+    if(keynum == 65361)
     {
-        which_element(player_infos->mlx_ptrs, player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
         player_infos->rotation_angle += player_infos->rotation_speed * (-1);
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
-        draw_circle(player_infos->mlx_ptrs, player_infos, 2, 0xfff000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
-    if (keynum == 13)
+    if (keynum == 119)
     {
-        which_element(player_infos->mlx_ptrs, player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0x000000);
         player_infos->new_i = player_infos->i + cos(player_infos->rotation_angle) * player_infos->move_speed;
         player_infos->new_j = player_infos->j + sin(player_infos->rotation_angle) * player_infos->move_speed;
-        check_player_new_pos(player_infos);
+        player_new_pos_up(player_infos);
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
-        draw_circle(player_infos->mlx_ptrs, player_infos, 2, 0xfff000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
-    if (keynum == 1)
+    if (keynum == 115)
     {
-        which_element(player_infos->mlx_ptrs, player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0x000000);
         player_infos->new_i = player_infos->i + cos(player_infos->rotation_angle) * (player_infos->move_speed * -1);
         player_infos->new_j = player_infos->j + sin(player_infos->rotation_angle) * (player_infos->move_speed * -1);
-        check_player_new_pos(player_infos);
+        player_new_pos(player_infos);
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
-        draw_circle(player_infos->mlx_ptrs, player_infos, 2, 0xfff000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
-    if (keynum == 53)
-    {
+    if (keynum == 65307)
         exit(1);
-    }
     return(0);
 }
 
@@ -199,7 +247,7 @@ void get_player_pos(t_player_info *player_infos)
             {
                 player_infos->i = (i + 0.5) * cub_size;
                 player_infos->j = (j + 0.5) * cub_size;
-                draw_circle(player_infos->mlx_ptrs, player_infos, 2, 0xfff000);
+                draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
                 draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
                 return;
             }
@@ -217,8 +265,8 @@ int main()
     mlx_ptrs.mlx_ptr = mlx_init();
     mlx_ptrs.mlx_wind = mlx_new_window(mlx_ptrs.mlx_ptr, COLS * cub_size, ROWS * cub_size, "test");
     player_infos.rotation_angle = (M_PI / 180) * 180;
-    player_infos.rotation_speed = 60 * (M_PI / 180);
-    player_infos.move_speed = 10;
+    player_infos.rotation_speed = 45 * (M_PI / 180);
+    player_infos.move_speed = 30;
     player_infos.mlx_ptrs = &mlx_ptrs;
     which_element(&mlx_ptrs, &player_infos);
     get_player_pos(&player_infos);

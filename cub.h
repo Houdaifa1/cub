@@ -2,8 +2,8 @@
 # define CUB_H
 
 # include <math.h>
-//# include <mlx.h>
-# include "./minilibx/mlx.h"
+# include <mlx.h>
+//# include "./minilibx/mlx.h"
 # include <fcntl.h>
 # include <limits.h>
 # include <stdarg.h>
@@ -11,7 +11,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-# define cub_size 32
+# define cub_size 64
 # ifndef BUFFER_SIZE
 # define BUFFER_SIZE 20
 # define ROWS 19
