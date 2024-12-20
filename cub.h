@@ -2,11 +2,12 @@
 # define CUB_H
 
 # include <math.h>
-# include <mlx.h>
+# include "mlx.h"
 //# include "./minilibx/mlx.h"
 # include <fcntl.h>
 # include <limits.h>
-# include <stdarg.h>
+
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -19,7 +20,9 @@
 # define line 20
 # endif
 
-# define M_PI 3.14159265358979323846
+//# define M_PI 3.14159265358979323846
+
+
 
 typedef  struct mlx
 {
@@ -27,6 +30,17 @@ typedef  struct mlx
     void    *mlx_wind;
 
 } t_mlx_ptrs;
+
+typedef struct hit
+{
+    int hi;
+    int hj;
+    int vj;
+    int vi;
+    int ni;
+    int nj;
+    int lenght;
+} t_wall_hit;
 
 typedef struct player_info
 {
@@ -41,9 +55,28 @@ typedef struct player_info
     float       rotation_speed;
     int         fov_lenght;
     int         color;
+    char        map[ROWS][COLS];
     t_mlx_ptrs  *mlx_ptrs;
+    t_wall_hit  *wall_hit;
 
 } t_player_info;
+
+
+void cast_rays(t_player_info *player_infos);
+void which_element(t_player_info *player_infos);
+void find_inters_up_right_h(t_player_info *player_infos);
+void find_inters_up_right_v(t_player_info *player_infos);
+void find_inters_up_left_h(t_player_info *player_infos);
+void find_inters_up_left_v(t_player_info *player_infos);
+void find_inters_down_right_h(t_player_info *player_infos);
+void find_inters_down_right_v(t_player_info *player_infos);
+void find_inters_down_left_h(t_player_info *player_infos);
+void find_inters_down_left_v(t_player_info *player_infos);
+void find_nearest_wall_hit_down_left(t_player_info *player_infos);
+void find_nearest_wall_hit_up_right(t_player_info *player_infos);
+void find_nearest_wall_hit_down_right(t_player_info *player_infos);
+void find_nearest_wall_hit_up_left(t_player_info *player_infos);
+
 
 
 

@@ -2,10 +2,10 @@
 
 char map[ROWS][COLS] = {
   "111111111111111111111111",
-  "1p0000000000000000000001",
-  "100001111111000110000001",
   "100000000000000000000001",
-  "100000100000000111110001",
+  "1p0011111110001100000001",
+  "110000000000000000000001",
+  "101000100100000111110001",
   "100000100010000000000001",
   "100000000010000000000001",
   "100000100010000000000001",
@@ -88,7 +88,7 @@ void draw_pixels(t_mlx_ptrs *mlx_ptrs, int j, int i, t_player_info *player_infos
     }
 }
 
-void which_element(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos)
+void which_element(t_player_info *player_infos)
 {
     int i;
     int j;
@@ -100,11 +100,11 @@ void which_element(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos)
         while(i < COLS)
         {
             if (map[j][i] == '1')
-                draw_pixels(mlx_ptrs, j, i, player_infos);
+                draw_pixels(player_infos->mlx_ptrs, j, i, player_infos);
             else if (map[j][i] == '0')
-                draw_pixels(mlx_ptrs, j, i, player_infos);
+                draw_pixels(player_infos->mlx_ptrs, j, i, player_infos);
             else if (map[j][i] == 'p')
-                draw_pixels(mlx_ptrs, j, i, player_infos);
+                draw_pixels(player_infos->mlx_ptrs, j, i, player_infos);
             i++;
         }
         j++;
@@ -187,10 +187,13 @@ void player_new_pos_up(t_player_info *player_infos)
 
 int handlle_keys(int keynum, t_player_info *player_infos)
 {
+    
     if (keynum == 65363)
     {
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
-        player_infos->rotation_angle += player_infos->rotation_speed * 1;   
+        player_infos->rotation_angle += player_infos->rotation_speed * 1;
+        if (player_infos->rotation_angle > (360 * (M_PI / 180)))
+              player_infos->rotation_angle -= 360 * (M_PI / 180);
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
         draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
         
@@ -199,6 +202,8 @@ int handlle_keys(int keynum, t_player_info *player_infos)
     {
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
         player_infos->rotation_angle += player_infos->rotation_speed * (-1);
+        if (player_infos->rotation_angle < 0)
+              player_infos->rotation_angle += 360 * (M_PI / 180);
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
         draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
@@ -222,14 +227,16 @@ int handlle_keys(int keynum, t_player_info *player_infos)
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
         draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
+     cast_rays(player_infos);
     if (keynum == 65307)
         exit(1);
     return(0);
 }
 
-handlle_rotation(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos)
+handlle_rotation(t_player_info *player_infos)
 {
-    mlx_hook(mlx_ptrs->mlx_wind, 02, 1L<<0, handlle_keys, player_infos);
+    mlx_hook(player_infos->mlx_ptrs->mlx_wind, 02, 1L<<0, handlle_keys, player_infos);
+
 }
 
 void get_player_pos(t_player_info *player_infos)
@@ -264,13 +271,22 @@ int main()
     
     mlx_ptrs.mlx_ptr = mlx_init();
     mlx_ptrs.mlx_wind = mlx_new_window(mlx_ptrs.mlx_ptr, COLS * cub_size, ROWS * cub_size, "test");
-    player_infos.rotation_angle = (M_PI / 180) * 180;
-    player_infos.rotation_speed = 45 * (M_PI / 180);
-    player_infos.move_speed = 30;
+    //mlx_new_image();
+    player_infos.rotation_angle = (M_PI / 180) * 0;
+    player_infos.rotation_speed = 1 * (M_PI / 180);
+    player_infos.move_speed = 10;
+    for (int i = 0; i < ROWS; i++)
+    {
+        for (int j = 0; j < COLS; j++)
+        {
+            player_infos.map[i][j] = map[i][j];
+        }
+    }
     player_infos.mlx_ptrs = &mlx_ptrs;
-    which_element(&mlx_ptrs, &player_infos);
+    which_element(&player_infos);
     get_player_pos(&player_infos);
-    handlle_rotation(&mlx_ptrs, &player_infos);
+    handlle_rotation(&player_infos);
+   
     mlx_loop(mlx_ptrs.mlx_ptr);
     return(0);
 }
