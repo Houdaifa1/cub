@@ -12,7 +12,7 @@ void find_inters_down_right_h(t_player_info *player_infos)
     player_infos->wall_hit->hi = 0;
     player_infos->wall_hit->hj = 0;
     jsteps = ((int)player_infos->j / cub_size) * cub_size + cub_size;    
-    isteps = player_infos->i + (jsteps - player_infos->j) / fabs(tan(player_infos->rotation_angle));    
+    isteps = player_infos->i + (jsteps - player_infos->j) / fabs(tan(player_infos->ray_rotation_angle));    
     y = ((int)jsteps) / cub_size;
     x = ((int)isteps) / cub_size;
     printf("y : %d                      x : %d\n", y, x );
@@ -25,7 +25,7 @@ void find_inters_down_right_h(t_player_info *player_infos)
     while (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] != '1')
     {
         jsteps += cub_size;
-        isteps += cub_size / fabs(tan(player_infos->rotation_angle));
+        isteps += cub_size / fabs(tan(player_infos->ray_rotation_angle));
         y = ((int)jsteps) / cub_size;
         x = ((int)isteps) / cub_size;
     }
@@ -45,7 +45,7 @@ void find_inters_down_right_v(t_player_info *player_infos)
     player_infos->wall_hit->vi = 0;
     player_infos->wall_hit->vj = 0;
     isteps = ((int)player_infos->i / cub_size) * cub_size + cub_size;
-    jsteps = player_infos->j + (isteps - player_infos->i) * fabs(tan(player_infos->rotation_angle));
+    jsteps = player_infos->j + (isteps - player_infos->i) * fabs(tan(player_infos->ray_rotation_angle));
     y = ((int)jsteps) / cub_size;
     x = (int)isteps / cub_size;
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] == '1')
@@ -57,7 +57,7 @@ void find_inters_down_right_v(t_player_info *player_infos)
     while (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] != '1')
     {
         isteps += cub_size;
-        jsteps += cub_size * fabs(tan(player_infos->rotation_angle));
+        jsteps += cub_size * fabs(tan(player_infos->ray_rotation_angle));
         y = ((int)jsteps ) / cub_size;
         x = ((int)isteps) / cub_size;
     }

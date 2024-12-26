@@ -9,7 +9,7 @@ void find_inters_up_left_h(t_player_info *player_infos)
     player_infos->wall_hit->hi = 0;
     player_infos->wall_hit->hj = 0;
     jsteps = ((int)player_infos->j / cub_size) * cub_size;    
-    isteps = player_infos->i - (player_infos->j - jsteps) / fabs(tan(player_infos->rotation_angle));    
+    isteps = player_infos->i - (player_infos->j - jsteps) / fabs(tan(player_infos->ray_rotation_angle));    
     y = ((int)jsteps - 1) / cub_size;
     x = ((int)isteps - 1) / cub_size;
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] == '1')
@@ -21,7 +21,7 @@ void find_inters_up_left_h(t_player_info *player_infos)
     while (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] != '1')
     {
         jsteps -= cub_size;
-        isteps -= cub_size / fabs(tan(player_infos->rotation_angle));
+        isteps -= cub_size / fabs(tan(player_infos->ray_rotation_angle));
         y = ((int)jsteps - 1) / cub_size;
         x = ((int)isteps - 1) / cub_size;
     }
@@ -41,7 +41,7 @@ void find_inters_up_left_v(t_player_info *player_infos)
     player_infos->wall_hit->vi = 0;
     player_infos->wall_hit->vj = 0;
     isteps = ((int)player_infos->i / cub_size) * cub_size;
-    jsteps = player_infos->j - (player_infos->i - isteps) * fabs(tan(player_infos->rotation_angle));
+    jsteps = player_infos->j - (player_infos->i - isteps) * fabs(tan(player_infos->ray_rotation_angle));
     y = ((int)jsteps - 1) / cub_size;
     x = ((int)isteps - 1) / cub_size;
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] == '1')
@@ -54,7 +54,7 @@ void find_inters_up_left_v(t_player_info *player_infos)
     while (y >= 0 && y < ROWS && x >= 0 && x < COLS && player_infos->map[y][x] != '1')
     {
         isteps -= cub_size;
-        jsteps -= cub_size * fabs(tan(player_infos->rotation_angle));
+        jsteps -= cub_size * fabs(tan(player_infos->ray_rotation_angle));
         y = ((int)jsteps - 1) / cub_size;
         x = ((int)isteps - 1) / cub_size;
     }
@@ -68,8 +68,18 @@ void find_inters_up_left_v(t_player_info *player_infos)
 void find_nearest_wall_hit_up_left(t_player_info *player_infos)
 {
      printf("hj : %d  hi : %d                vj : %d   vi : %d\n", player_infos->wall_hit->hj, player_infos->wall_hit->hi, player_infos->wall_hit->vj, player_infos->wall_hit->vi);
-    if (player_infos->wall_hit->vj == 0 || (player_infos->wall_hit->hj > player_infos->wall_hit->vj &&
-        player_infos->wall_hit->hi > player_infos->wall_hit->vi))
+    if (player_infos->wall_hit->hi == 0 || player_infos->wall_hit->hj == 0)
+    {
+        player_infos->wall_hit->nj = player_infos->wall_hit->vj;
+        player_infos->wall_hit->ni = player_infos->wall_hit->vi;
+    }
+    else if (player_infos->wall_hit->vi == 0 || player_infos->wall_hit->vj == 0)
+    {
+        player_infos->wall_hit->nj = player_infos->wall_hit->hj;
+        player_infos->wall_hit->ni = player_infos->wall_hit->hi;
+    }
+    else if (player_infos->wall_hit->hj > player_infos->wall_hit->vj &&
+        player_infos->wall_hit->hi > player_infos->wall_hit->vi)
     {
         player_infos->wall_hit->nj = player_infos->wall_hit->hj;
         player_infos->wall_hit->ni = player_infos->wall_hit->hi;

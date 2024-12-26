@@ -2,12 +2,12 @@
 
 char map[ROWS][COLS] = {
   "111111111111111111111111",
-  "100000000000000000000001",
-  "1p0011111110001100000001",
+  "010000000000000000000001",
+  "1p1011111100001100000001",
   "110000000000000000000001",
-  "101000100100000111110001",
+  "101000010100000111110001",
   "100000100010000000000001",
-  "100000000010000000000001",
+  "100000010100000000000001",
   "100000100010000000000001",
   "100000100011100000000001",
   "1000001000100000p0000001",
@@ -22,6 +22,43 @@ char map[ROWS][COLS] = {
   "111111111111111111111111",
 };
 
+
+// void my_mlx_pixel_put( int x, int y, int color)
+// {
+//     char *dst;
+
+//     // if (x < 0 || x >= game->map_width * TILE_SIZE || y < 0 || y >= game->map_height * TILE_SIZE)
+//     //     return ;
+//     dst = addr + (y * line_length + x * (bpp / 8));
+    
+//     *(unsigned int *)dst = color;
+// }
+void my_mlx_pixel_put2(t_player_info *player_infos ,int x, int y, int color)
+{
+    char *dst;
+
+    char    *pixel;
+    int		i;
+
+    i = player_infos->bpp - 8;
+    pixel = player_infos->addr + (y * player_infos->line_length + x * (player_infos->bpp / 8));
+    while (i >= 0)
+    {
+        /* big endian, MSB is the leftmost bit */
+        if (player_infos->endian != 0)
+            *pixel++ = (color >> i) & 0xFF;
+        /* little endian, LSB is the leftmost bit */
+        else
+            *pixel++ = (color >> (player_infos->bpp - 8 - i)) & 0xFF;
+        i -= 8;
+    }
+
+    // if (x < 0 || x >= game->map_width * TILE_SIZE || y < 0 || y >= game->map_height * TILE_SIZE)
+    //     return ;
+   // dst = player_infos->addr + (y * player_infos->line_length + x * (player_infos->bpp / 8));
+    
+   // *(unsigned int *)dst = color;
+}
 void draw_circle(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos, int radius, int color)
 {
     int dx_limit;
@@ -35,7 +72,7 @@ void draw_circle(t_mlx_ptrs *mlx_ptrs, t_player_info *player_infos, int radius, 
         dx = -dx_limit;
         while (dx <= dx_limit)
         {
-            mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, player_infos->i + dx, player_infos->j + dy, color);
+            my_mlx_pixel_put2(player_infos, (int)player_infos->i + dx, (int)player_infos->j + dy, color);
             dx++;
         }
         dy++;
@@ -56,15 +93,19 @@ void draw_line_view(t_mlx_ptrs *mlx_ptrs,t_player_info *player_infos, int line_l
         y = (int)y1 / cub_size;
         x = (int)x1 / cub_size;
         if (map[y][x] != '1')
-            mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x1, y1, color);
+            my_mlx_pixel_put2(player_infos, (int)x1, (int)y1, color);
         line_lenght--;
     }
 }
+
 void new_player_pos(t_player_info *player_infos)
 {
     player_infos->i = player_infos->i + cos(player_infos->rotation_angle) * player_infos->move_speed;
     player_infos->j = player_infos->j + sin(player_infos->rotation_angle) * player_infos->move_speed;
 }
+
+
+
 void draw_pixels(t_mlx_ptrs *mlx_ptrs, int j, int i, t_player_info *player_infos)
 {
     int x;
@@ -77,11 +118,11 @@ void draw_pixels(t_mlx_ptrs *mlx_ptrs, int j, int i, t_player_info *player_infos
         while(x < (i + 1) * cub_size)
         {
             if (map[j][i] == '0')
-                mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x , y, 0x000000);
+                my_mlx_pixel_put2(player_infos, x , y, 0x000000);
             if (map[j][i] == '1')
-                mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x, y, 0xffffff);
+                my_mlx_pixel_put2( player_infos,x, y, 0xffffff);
             if (map[j][i] == 'p')
-                mlx_pixel_put(mlx_ptrs->mlx_ptr, mlx_ptrs->mlx_wind, x , y, 0x000000);
+                my_mlx_pixel_put2(player_infos, x , y, 0x000000);
             x++;
         }
         y++;
@@ -111,6 +152,51 @@ void which_element(t_player_info *player_infos)
     }
 }
 
+
+void draw_pixels2(t_mlx_ptrs *mlx_ptrs, int j, int i, t_player_info *player_infos)
+{
+    int x;
+    int y;
+
+    y = j * cub_size;
+    while(y < (j + 1) * cub_size)
+    {
+        x = i * cub_size ; 
+        while(x < (i + 1) * cub_size)
+        {
+            if (map[j][i] == '0')
+                mlx_pixel_put(player_infos->mlx_ptrs->mlx_ptr, player_infos->win, x , y, 0x000000);
+            if (map[j][i] == '1')
+                mlx_pixel_put(player_infos->mlx_ptrs->mlx_ptr, player_infos->win, x , y, 0xFFFFFF);
+            if (map[j][i] == 'p')
+                mlx_pixel_put(player_infos->mlx_ptrs->mlx_ptr, player_infos->win, x , y, 0x000000);
+            x++;
+        }
+        y++;
+    }
+}
+void which_element2(t_player_info *player_infos)
+{
+    int i;
+    int j;
+
+    j = 0;
+    while(j < ROWS)
+    {
+        i = 0;
+        while(i < COLS)
+        {
+            if (map[j][i] == '1')
+                draw_pixels2(player_infos->mlx_ptrs, j, i, player_infos);
+            else if (map[j][i] == '0')
+                draw_pixels2(player_infos->mlx_ptrs, j, i, player_infos);
+            else if (map[j][i] == 'p')
+                draw_pixels2(player_infos->mlx_ptrs, j, i, player_infos);
+            i++;
+        }
+        j++;
+    }
+}
 
 void player_new_pos(t_player_info *player_infos)
 {
@@ -184,10 +270,8 @@ void player_new_pos_up(t_player_info *player_infos)
 }
 
 
-
 int handlle_keys(int keynum, t_player_info *player_infos)
 {
-    
     if (keynum == 65363)
     {
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
@@ -227,7 +311,27 @@ int handlle_keys(int keynum, t_player_info *player_infos)
         draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
         draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
     }
-     cast_rays(player_infos);
+     if (keynum == 100) // 'd' key
+    {
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
+        player_infos->new_i = player_infos->i + cos(player_infos->rotation_angle + M_PI /2) * player_infos->move_speed;
+        player_infos->new_j = player_infos->j + sin(player_infos->rotation_angle + M_PI /2) * player_infos->move_speed;
+        player_new_pos(player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
+    }
+    if (keynum == 97) // 'a' key
+    {
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0x000000);
+        player_infos->new_i = player_infos->i + cos(player_infos->rotation_angle - M_PI / 2) * player_infos->move_speed;
+        player_infos->new_j = player_infos->j + sin(player_infos->rotation_angle - M_PI /2) * player_infos->move_speed;
+        player_new_pos(player_infos);
+        draw_line_view(player_infos->mlx_ptrs, player_infos, line, 0xff0000);
+        draw_circle(player_infos->mlx_ptrs, player_infos, 1, 0xfff000);
+    }
+      which_element(player_infos);
+    cast_rays(player_infos);
+    mlx_put_image_to_window(player_infos->mlx_ptrs->mlx_ptr, player_infos->win, player_infos->img, 0, 0);
     if (keynum == 65307)
         exit(1);
     return(0);
@@ -235,8 +339,8 @@ int handlle_keys(int keynum, t_player_info *player_infos)
 
 handlle_rotation(t_player_info *player_infos)
 {
-    mlx_hook(player_infos->mlx_ptrs->mlx_wind, 02, 1L<<0, handlle_keys, player_infos);
-
+    mlx_hook(player_infos->win, 02, 1L<<0, handlle_keys, player_infos);
+    //  mlx_hook(player_infos->win, 3, 1L << 1, key_release, player_infos);
 }
 
 void get_player_pos(t_player_info *player_infos)
@@ -268,9 +372,14 @@ int main()
 {
     t_mlx_ptrs mlx_ptrs;
     t_player_info player_infos;
-    
+
+
+
     mlx_ptrs.mlx_ptr = mlx_init();
-    mlx_ptrs.mlx_wind = mlx_new_window(mlx_ptrs.mlx_ptr, COLS * cub_size, ROWS * cub_size, "test");
+    player_infos.win = mlx_new_window(mlx_ptrs.mlx_ptr, COLS * cub_size, ROWS * cub_size, "Cub3D");
+    player_infos.img = mlx_new_image(mlx_ptrs.mlx_ptr, COLS * cub_size, ROWS * cub_size);
+    player_infos.addr = mlx_get_data_addr(player_infos.img, &player_infos.bpp, &player_infos.line_length, &player_infos.endian);
+    
     //mlx_new_image();
     player_infos.rotation_angle = (M_PI / 180) * 0;
     player_infos.rotation_speed = 1 * (M_PI / 180);
@@ -282,11 +391,13 @@ int main()
             player_infos.map[i][j] = map[i][j];
         }
     }
+
     player_infos.mlx_ptrs = &mlx_ptrs;
     which_element(&player_infos);
     get_player_pos(&player_infos);
     handlle_rotation(&player_infos);
-   
+
+    mlx_put_image_to_window(mlx_ptrs.mlx_ptr, player_infos.win, player_infos.img, 0, 0);
     mlx_loop(mlx_ptrs.mlx_ptr);
     return(0);
 }
