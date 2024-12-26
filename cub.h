@@ -4,22 +4,28 @@
 # include <math.h>
 # include "mlx.h"
 //# include "./minilibx/mlx.h"
+# include "./get_next_line/get_next_line.h"
 # include <fcntl.h>
 # include <limits.h>
-
-
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 
-# define cub_size 64
+# define CUB_SIZE 64
 # ifndef BUFFER_SIZE
 # define BUFFER_SIZE 20
-# define ROWS 19
-# define COLS 24
-# define FOV 60
-# define line 20
 # endif
+
+# define FOV 60
+# define LINE 20
+#define TILE_SIZE 64
+#define W_KEY        119
+#define S_KEY        115
+#define A_KEY        97
+#define D_KEY        100
+#define LEFT_ARROW   65361
+#define RIGHT_ARROW  65363
+#define ESC          65307
 
 //# define M_PI 3.14159265358979323846
 
@@ -28,7 +34,12 @@
 typedef  struct mlx
 {
     void    *mlx_ptr;
-    void    *mlx_wind;
+    void    *win;
+    void    *img;           // Pointer to the image
+    char    *addr;          // Address of the image data
+    int     bpp;            // Bits per pixel
+    int     line_length;    // Number of bytes in a row
+    int     endian;  
 
 } t_mlx_ptrs;
 
@@ -56,47 +67,78 @@ typedef struct player_info
     float       move_speed;
     float       rotation_speed;
     int         fov_lenght;
-
-    void    *mlx;           // Pointer to the MiniLibX connection
-    void    *win;           // Pointer to the MiniLibX window
-    void    *img;           // Pointer to the image
-    char    *addr;          // Address of the image data
-    int     bpp;            // Bits per pixel
-    int     line_length;    // Number of bytes in a row
-    int     endian;  
+        int     map_width;      
+    int     map_height; 
     int         color;
-    char        map[ROWS][COLS];
-    t_mlx_ptrs  *mlx_ptrs;
+     char    **map;
     t_wall_hit  *wall_hit;
 
 } t_player_info;
 
+typedef struct s_keys
+{
+    int w;
+    int s;
+    int a;
+    int d;
+    int left;
+    int right;
+} t_keys;
 
-// size_t  ft_strlen2(const char *s);
-// void    parsing(t_base *game, char *file_name);
-// int     ft_strncmp(const char *s1, const char *s2, size_t n);
-// char	**ft_split(const char *s, char c);
-// void	free_split(char **str);
-// // void    ft_parse_texture(t_base *game, char **tokens);
-// void ft_parse_texture(t_base *game, char *tokens);
-
-
-// int parse_map(t_base *game, int fd);
-// void    ft_printf_err(char *str);
-// char	*ft_strdup(const char *s1);
-// int parse_color(char *line);
-// char	*ft_strtrim(char const *s1, char const *set);
-// int	ft_isdigit(int i);
-// void	*ft_memset(void *dest, int c, size_t count);
-// int game_loop(t_base *game);
-// void draw_map(t_base *game);
-// void draw_square(t_base *game, int x, int y, int color);
-
+typedef struct cub
+{
+    int     fd;
+    char    *readmap;
+    char    **map;
+    int     map_width;      
+    int     map_height;     
+    int     player_x;       
+    int     player_y;       
+    char    player_dir;     
+    char    *textures[4];   
+    int     floor_color;    
+    int     ceiling_color;
+    t_keys  *s_keys;
+    t_mlx_ptrs  *mlx_ptrs;
+    t_player_info *player_infos;
+} t_base;
 
 
 
+// momazouz part
+size_t  ft_strlen2(const char *s);
+void    parsing(t_base *game, char *file_name);
+int     ft_strncmp(const char *s1, const char *s2, size_t n);
+char	**ft_split(const char *s, char c);
+void	free_split(char **str);
+// void    ft_parse_texture(t_base *game, char **tokens);
+void ft_parse_texture(t_base *game, char *tokens);
+int parse_map(t_base *game, int fd);
+void    ft_printf_err(char *str);
+char	*ft_strdup(const char *s1);
+int parse_color(char *line);
+char	*ft_strtrim(char const *s1, char const *set);
+int	ft_isdigit(int i);
+void	*ft_memset(void *dest, int c, size_t count);
+int game_loop(t_base *game);
+void draw_map(t_base *game);
+void draw_square(t_base *game, int x, int y, int color);
 
-void cast_rays(t_player_info *player_infos);
+
+
+void ft_init_struct_game(t_base *game);
+int key_press(int keycode, t_base *game);
+int key_release(int keycode, t_base *game);
+void initialize_keys(t_base *game);
+void my_mlx_pixel_put(t_base *game, int x, int y, int color);
+void draw_square(t_base *game, int x, int y, int color);
+void draw_map(t_base *game);
+
+
+
+
+//hdrahm part
+void cast_rays(t_base *game);
 void which_element(t_player_info *player_infos);
 void find_inters_up_right_h(t_player_info *player_infos);
 void find_inters_up_right_v(t_player_info *player_infos);
